@@ -1,0 +1,7 @@
+# Local outputs and editor state
+/results/
+/archive/local/
+*.asv
+*.m~
+.DS_Store
+octave-workspace

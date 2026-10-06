@@ -1,254 +1,64 @@
-# Finite Element Simulation in Porous Media
+# FEA-Acoustic
 
-A MATLAB-based finite element implementation for simulating acoustic wave propagation in porous and heterogeneous media.
+A small MATLAB finite-element solver for two-dimensional, frequency-domain acoustic pressure in homogeneous, porous, and heterogeneous media.
 
-This repository contains several educational FEM examples developed for EN234 (Brown University, 2017). The codes demonstrate how to construct a finite element solver for acoustic Helmholtz problems, including mesh generation, stiffness matrix assembly, porous acoustic modeling, and multi-material domain simulations.
+The project grew out of an independent 2017 implementation. The maintained solver and examples now share one implementation; the original standalone files are preserved under `archive/legacy/` for provenance and are not part of the supported API.
 
----
+## Scope
 
-# Repository Structure
+The current solver uses linear triangular (P1) elements for
 
-```text
-FEM_Final.m
-```
+\[
+\nabla^2 p + k^2 p = 0,
+\]
 
-Basic 2D acoustic FEM simulation in a homogeneous medium with comparison against the analytical 1D solution.
+with the weak form
 
-```text
-FEM_Final_example2.m
-```
+\[
+\int_\Omega \nabla N^T\nabla p - k^2 N^T p\,d\Omega = 0.
+\]
 
-Acoustic propagation around a circular void using an unstructured triangular mesh.
+It supports prescribed pressure on selected nodes and the natural homogeneous Neumann condition on the remaining boundary. Porous examples use a thermoviscous effective-density/effective-bulk-modulus model. The circular-void example approximates the void by removing nearby mesh nodes and triangles; it is not an exact curved-boundary mesh.
 
-```text
-FEM_Final_example3.m
-```
+## Requirements
 
-Thermoviscous porous acoustic model with complex-valued effective material properties.
+- MATLAB R2021a or newer is recommended.
+- The examples use MATLAB's built-in Delaunay triangulation, sparse matrices, and plotting functions. No additional toolbox is intentionally required.
+- GNU Octave compatibility has not yet been verified.
 
-```text
-FEM_Final_example4_low.m
-```
+## Run an example
 
-Multi-material acoustic simulation with spatially varying porous media properties.
-
----
-
-# Governing Equation
-
-The simulations solve the frequency-domain acoustic Helmholtz equation:
-
-$$
-\nabla^2 p + k^2 p = 0
-$$
-
-where:
-
-- $p$ is the acoustic pressure
-- $k$ is the acoustic wavenumber
-
-The acoustic wavenumber is defined as:
-
-$$
-k = \frac{2\pi f}{c_0}
-$$
-
-where:
-
-- $f$ is the frequency
-- $c_0$ is the sound speed in air
-
-For the 1D validation case, the analytical solution is:
-
-$$
-p(x) = \frac{\cos(kx)}{\cos(kL)}
-$$
-
----
-
-# Numerical Method
-
-The implementation uses:
-
-- Linear triangular finite elements
-- Delaunay triangulation
-- Gaussian integration
-- Direct stiffness matrix assembly
-- Sparse matrix visualization
-
-The elemental FEM formulation is:
-
-$$
-K_e = \int_{\Omega} \left(\nabla N \cdot \nabla N - k^2 N N\right) d\Omega
-$$
-
-where:
-
-- $N$ denotes the shape functions
-- $k$ is the local acoustic coefficient
-
----
-
-# Example 1 — Homogeneous Acoustic Medium
-
-This example demonstrates the basic FEM solution of acoustic wave propagation in a rectangular domain.
-
-## Features
-
-- Structured rectangular mesh
-- Triangular element generation
-- Global stiffness assembly
-- Dirichlet boundary condition
-- Comparison with analytical solution
-
-## Output
-
-The code generates:
-
-- FEM mesh
-- Sparsity pattern of stiffness matrix
-- Reordered sparse matrix using `symrcm`
-- 2D pressure field
-- Numerical vs analytical comparison
-
----
-
-# Example 2 — Acoustic Scattering Around a Circular Void
-
-This example introduces an internal circular cavity inside the computational domain.
-
-Elements located inside the circular region are removed after Delaunay triangulation.
-
-## Features
-
-- Unstructured mesh generation
-- Internal obstacle removal
-- Acoustic scattering behavior
-- Pressure field masking using `NaN`
-
-## Geometry
-
-The circular void satisfies:
-
-$$
-(x-L/2)^2 + (y-H/2)^2 < R^2
-$$
-
----
-
-# Example 3 — Thermoviscous Porous Acoustic Medium
-
-This example incorporates thermoviscous effects in narrow slit-like porous channels.
-
-The porous material is modeled using complex-valued effective density and effective bulk modulus.
-
-## Effective Acoustic Model
-
-The effective acoustic coefficient is:
-
-$$
-k =
-\omega
-\sqrt{
-\frac{\rho_{\mathrm{eff}}}
-{K_{\mathrm{eff}}}
-}
-$$
-
-where:
-
-- $\rho_{\mathrm{eff}}$ is the effective density
-- $K_{\mathrm{eff}}$ is the effective bulk modulus
-- $\omega = 2\pi f$
-
-## Features
-
-- Complex-valued FEM system
-- Frequency-dependent attenuation
-- Real and imaginary pressure comparison
-- Thermoviscous porous media modeling
-
----
-
-# Example 4 — Multi-Material Acoustic Domain
-
-This example demonstrates wave propagation through multiple acoustic regions with different porous properties.
-
-Different element coefficients are assigned according to element centroid positions.
-
-## Features
-
-- Spatially varying acoustic properties
-- Multiple porous media regions
-- Heterogeneous FEM assembly
-- Complex-valued acoustic propagation
-
----
-
-# Material Parameters
-
-Typical parameters used in the simulations:
+From the repository root in MATLAB:
 
 ```matlab
-density = 1.23;              % air density [kg/m^3]
-viscosity = 1.95e-5;         % dynamic viscosity [Pa·s]
-c0 = 343;                    % speed of sound [m/s]
-p0 = 1.013e5;                % ambient pressure [Pa]
-gamma = 1.4;                 % heat capacity ratio
+addpath('src');
+addpath('examples');
+result = homogeneous_validation;
 ```
 
----
+Other examples are `circular_void_scattering`, `thermoviscous_porous_layer`, `heterogeneous_materials`, and `graded_porous_material`. Each returns a struct containing the mesh, sparse stiffness matrix, and nodal complex pressure. Pass `false` as the first argument to suppress plots, and optionally pass `[nx, ny]` as the second argument to change mesh resolution.
 
-# Running the Code
+## Tests
 
-Run any example directly in MATLAB:
+Run the lightweight solver and example checks from the repository root:
 
 ```matlab
-FEM_Final
+addpath('tests');
+run_tests;
 ```
 
-or
+The checks cover element-matrix properties, exact Dirichlet values, mesh-refinement behavior against the one-dimensional homogeneous solution, and finite solutions for each example. GitHub Actions runs the same checks in MATLAB on pushes and pull requests.
 
-```matlab
-FEM_Final_example2
+## Layout
+
+```text
+src/+acousticfem/   Mesh, element, material, assembly, and solve functions
+examples/           Named, runnable physical scenarios
+tests/               Small numerical and smoke checks
+archive/legacy/      Original 2017 standalone scripts
+archive/local/       Local-only archival files (ignored by Git)
 ```
 
-etc.
+## License and citation
 
----
-
-# Educational Purpose
-
-These examples were primarily developed as educational finite element projects exploring:
-
-- acoustic wave propagation
-- porous acoustic materials
-- thermoviscous losses
-- heterogeneous media
-- unstructured triangular FEM implementation
-
-The implementation prioritizes readability and transparency over computational efficiency.
-
----
-
-# Possible Future Improvements
-
-Potential extensions include:
-
-- absorbing boundary conditions
-- impedance boundary conditions
-- sparse matrix optimization
-- higher-order elements
-- frequency sweep automation
-- PML (Perfectly Matched Layer)
-- 3D acoustic FEM
-- coupled structural-acoustic simulations
-
----
-
-# Author
-
-Siyuan Song  
-Brown University  
-EN234 Final Project  
-December 2017
+The code is released under the MIT License. See [LICENSE](LICENSE). Citation metadata is in [CITATION.cff](CITATION.cff).
