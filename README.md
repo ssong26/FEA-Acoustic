@@ -8,15 +8,15 @@ The project grew out of an independent 2017 implementation. The maintained solve
 
 The current solver uses linear triangular (P1) elements for
 
-\[
+$$
 \nabla^2 p + k^2 p = 0,
-\]
+$$
 
 with the weak form
 
-\[
+$$
 \int_\Omega \nabla N^T\nabla p - k^2 N^T p\,d\Omega = 0.
-\]
+$$
 
 It supports prescribed pressure on selected nodes and the natural homogeneous Neumann condition on the remaining boundary. Porous examples use a thermoviscous effective-density/effective-bulk-modulus model. The circular-void example approximates the void by removing nearby mesh nodes and triangles; it is not an exact curved-boundary mesh.
 
