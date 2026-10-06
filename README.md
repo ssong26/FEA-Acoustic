@@ -2,7 +2,7 @@
 
 A small MATLAB finite-element solver for two-dimensional, frequency-domain acoustic pressure in homogeneous, porous, and heterogeneous media.
 
-The project grew out of an independent 2017 implementation. The maintained solver and examples now share one implementation; the original standalone files are preserved under `archive/legacy/` for provenance and are not part of the supported API.
+The author's original code is preserved in [archive/](archive/), under [archive/legacy/](archive/legacy/). In October 2026, the code was cleaned up and organized with assistance from Codex to make it easier to distribute. If you need the author's original implementation, please refer to the archived code. The original implementation dates to 2017; the maintained solver and examples now share one implementation.
 
 ## Scope
 
